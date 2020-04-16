@@ -15,14 +15,14 @@ We said that this is a kind of unification because it is not fully true.
 
 In this book, we will first present the notion of abstract syntax tree, then the syntax of the parse tree rewriter expressions with practical examples.
 
-We thanks for the following persons for their participation to this booklet from close or far:
+We thank everyone who came from near and far and aided us in the creation of this booklet. In particular:
 Gisela Decuzzi, Camille Teruel, John Brant, Lukas Renggli, Anne Etien, and Jean-Christophe Bach.
 
 % http://pharorwrules.wordpress.com/2013/08/06/just-want-to-match/
 
 
 
-!! 101 on AST and related sconcepts
+!! 101 on AST and related concepts
 
 An Abstract Syntax Tree (AST) is a tree data structure that represents source code as a tree of nodes.
 While source code is just a string of characters, an AST is a tree whose nodes correspond to the syntactic constructs
@@ -31,13 +31,13 @@ In Pharo, an AST node can represent a method, a
 message, a variable, a block, an assignment, etc.
 
 ""Terminology point."" Pharo ASTs are more concrete syntax trees in the sense that they keep information about the syntactic characters such 
-as parentheses, square bracket and pipe for temporaries definitions. We call them AST in the following, but now you know that we are not fully correct. 
+as parentheses, square bracket and pipe for temporaries definitions. We call them AST in the following, but now you know that we are not entirely correct. 
 
 
 Such a tree is much easier to process than a plain string. 
 That is why this data structure is used by most tools that have to deal with code.
 
-Let's met our first AST. Consider the following method. 
+Let's meet our first AST. Consider the following method. 
 
 [[[
 Point >> < aPoint 
@@ -53,6 +53,8 @@ You can get the AST of this method with the following expression.
 ]]]
 
 The root of the AST is a method node whose child is a return node. This return node has a message node and this message node has a receiver (the AST of the expression ==x < aPoint x==), a selector (==and:==) and a block node as argument. Explore this AST to get familiar with its structure. You can also inspect the ASTs of other methods of the system.
+
+@@todo Add a tree visualization for this example (otherwise it's hard to understand)
 
 
 +An inspector on an AST >file://figures/ASTInspector.pdf|width=50|label=astinspector+
@@ -137,7 +139,7 @@ These mappings correspond to the values the meta-variables of the pattern should
 
 Let's look at a few examples.
 If X and Y denote meta-variables, the pattern ==self X== matches ==self open== with the mapping: ==X== -> =='open'==.
-The pattern ==X Y== matches ==self open== with the mapping: ==Y== -> =='self==', ==Y== -> =='open'==.
+The pattern ==X Y== matches ==self open== with the mapping: ==X== -> =='self==', ==Y== -> =='open'==.
  As a failing example, ==X X== doesn't match ==self open== because X cannot be at the same time 'self' and 'open'.
  
 
@@ -161,7 +163,7 @@ Let's explain each construct by using it in a concrete context:
 !!! Example
 
 Let us start with an example and we want to make sure that our example is always correct 
-to we will verify it using tests. 
+so we will verify it using tests. 
 
 First we define a class to host 
 
@@ -173,6 +175,9 @@ TestCase subclass: #MMatcherTest
 ]]]
 
 The instance variable ==searcher== will refer to an instance of RBParseTreeSearcher and level is just an instance variable to illustrate that we can match different kind of nodes.
+
+@@todo Maybe we should introduce RBParseTreeSearcher first (what it is, what it does?). Because this is the first time that it appears on stage.
+
 We make sure that we want to reuse the logic as much as possible so we define
 a ==setUp== method and some helpers.
 [[[
@@ -205,7 +210,7 @@ We are now ready to check some searches.
 
 !!!! Not using meta-variables
 
-The first question is can ask to the searcher is to find an exact node. 
+The first question we can ask to the searcher is to find an exact node. 
 Here we look for the node (a message node) that represents the message ==current node==.
 
 [[[
@@ -232,7 +237,7 @@ testNoVariableMultipleMatches
 	self assert: (searcher answer collect: [ :each | each start ]) asArray equals: #(34 62 116 127)
 ]]]
 
-Looking for the nodes that matches ==current== we get four different temporary nodes each with its own source locations. It shows that the temporary definition is not part of the matches.
+Looking for the nodes that match ==current== we get four different temporary nodes each with its own source locations. It shows that the temporary definition is not part of the matches.
 
 [[[
 testNoVariableLevelMultipleMatches
@@ -680,22 +685,24 @@ concrete input:
 
 
 |!Pattern |! Input ||! Result 
-%| `r parent | x parent | Matches with ==x== as r
 | `r parent | x parent || =={ x }==
-%| `@r parent | x parent | Matches with ==x== as r
 | `@r parent | x parent || =={ x }==
-%| ``@r parent | x parent | Matches with ==x== as r
 | ``@r parent | x parent || =={ x }==
-%| ``r parent | x parent | Matches with ==x== as r
 | ``r parent | x parent || =={ x }==
-%| `r parent | x parent parent | Matches with ==x== as r
 | `r parent | x parent parent || =={ x }==
-%| `@r parent | x parent parent | Matches with ==x parent== as r
 | `@r parent | x parent parent || =={ x parent }==
-%| ``@r parent | x parent parent | Matches with ==x== as r and ==x parent== as r
 | ``@r parent | x parent parent || =={ x, x parent }==
-%| ``r parent | x parent parent | Matches with ==x== as r
 | ``r parent | x parent parent || =={ x }==
+
+
+%| `r parent | x parent | Matches with ==x== as r
+%| `@r parent | x parent | Matches with ==x== as r
+%| ``@r parent | x parent | Matches with ==x== as r
+%| ``r parent | x parent | Matches with ==x== as r
+%| `r parent | x parent parent | Matches with ==x== as r
+%| `@r parent | x parent parent | Matches with ==x parent== as r
+%| ``@r parent | x parent parent | Matches with ==x== as r and ==x parent== as r
+%| ``r parent | x parent parent | Matches with ==x== as r
 
 
 
